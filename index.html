@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Ticket Generator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: #eff6ff;
+  --accent-border: #bfdbfe;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --success: #16a34a;
+  --success-bg: #f0fdf4;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+.header h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header h1 .icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mode-toggle {
+  display: flex;
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 2px;
+  border: 1px solid var(--border);
+}
+
+.mode-toggle button {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.mode-toggle button.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Layout */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Form Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Form Elements */
+.field {
+  margin-bottom: 16px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+label .hint {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+input[type="text"],
+input[type="url"],
+select,
+textarea {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+/* Toggle Switch for Content Implementation */
+.toggle-group {
+  display: flex;
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  width: fit-content;
+}
+
+.toggle-group button {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.toggle-group button.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Generate Button */
+.btn-generate {
+  width: 100%;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 8px;
+}
+
+.btn-generate:hover {
+  background: var(--accent-hover);
+}
+
+.btn-generate:active {
+  transform: scale(0.995);
+}
+
+/* Output */
+.output-area {
+  display: none;
+}
+
+.output-area.visible {
+  display: block;
+}
+
+.ticket-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.ticket-header {
+  background: var(--accent-light);
+  border-bottom: 1px solid var(--accent-border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticket-header .ticket-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ticket-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ticket-section:last-child {
+  border-bottom: none;
+}
+
+.ticket-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ticket-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ticket-subject {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.ticket-body {
+  font-size: 14px;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.7;
+}
+
+/* Copy Button */
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-copy:hover {
+  background: var(--bg);
+  border-color: var(--text-muted);
+}
+
+.btn-copy.copied {
+  background: var(--success-bg);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.btn-copy svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Copy All */
+.btn-copy-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-copy-all:hover {
+  background: var(--bg);
+  border-color: var(--text-muted);
+}
+
+.btn-copy-all.copied {
+  background: var(--success-bg);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+/* Multi-ticket mode */
+.multi-form { display: none; }
+.multi-form.visible { display: block; }
+.single-form { display: block; }
+.single-form.hidden { display: none; }
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkbox-item label {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.multi-link-fields {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.multi-link-field {
+  display: none;
+  padding: 14px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.multi-link-field.visible {
+  display: block;
+}
+
+.multi-link-field label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.multi-link-field input,
+.multi-link-field textarea {
+  font-size: 13px;
+}
+
+/* Sub-options in multi mode */
+.multi-sub-options {
+  margin-top: 8px;
+}
+
+/* Output divider for multi-ticket */
+.ticket-divider {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 8px 0;
+}
+
+/* Footer area for copy all */
+.output-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .container { padding: 16px; }
+  .card { padding: 18px; }
+  .header { padding: 12px 16px; }
+  .header h1 { font-size: 16px; }
+  .ticket-section { padding: 14px 16px; }
+  .ticket-header { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>
+    <span class="icon">T</span>
+    SEO Ticket Generator
+  </h1>
+  <div class="mode-toggle">
+    <button class="active" onclick="setMode('single')">Single</button>
+    <button onclick="setMode('multi')">Multi-Ticket</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- SINGLE TICKET MODE -->
+  <div class="single-form" id="singleForm">
+    <div class="card">
+      <div class="card-title">Ticket Details</div>
+
+      <div class="field">
+        <label for="propertyName">Property / Community Name</label>
+        <input type="text" id="propertyName" placeholder="e.g. The Heights at Westchase" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="deliverableType">Deliverable Type</label>
+        <select id="deliverableType" onchange="onDeliverableChange()">
+          <option value="">Select a deliverable…</option>
+          <option value="titles">Titles, Meta Descriptions &amp; Headings</option>
+          <option value="linking">Internal Linking</option>
+          <option value="schema">Schema Markup</option>
+          <option value="content">Content Implementation</option>
+          <option value="technical">Technical Fix</option>
+        </select>
+      </div>
+
+      <div class="field" id="contentToggleField" style="display:none;">
+        <label>Content Type</label>
+        <div class="toggle-group" id="contentToggle">
+          <button class="active" data-value="new" onclick="setContentType(this)">Create New Page</button>
+          <button data-value="update" onclick="setContentType(this)">Update Existing Page</button>
+        </div>
+      </div>
+
+      <div class="field" id="linkField">
+        <label for="driveLink">Google Drive Link <span class="hint">(spreadsheet tab or Google Doc)</span></label>
+        <input type="url" id="driveLink" placeholder="https://docs.google.com/…">
+      </div>
+
+      <div class="field">
+        <label for="notes">Notes <span class="hint">(optional)</span></label>
+        <textarea id="notes" placeholder="Any additional context or instructions…"></textarea>
+      </div>
+
+      <button class="btn-generate" onclick="generateSingle()">Generate Ticket</button>
+    </div>
+  </div>
+
+  <!-- MULTI-TICKET MODE -->
+  <div class="multi-form" id="multiForm">
+    <div class="card">
+      <div class="card-title">Property Information</div>
+      <div class="field">
+        <label for="multiPropertyName">Property / Community Name</label>
+        <input type="text" id="multiPropertyName" placeholder="e.g. The Heights at Westchase" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Select Deliverables</div>
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <input type="checkbox" id="chk_titles" onchange="toggleMultiField('titles')">
+          <label for="chk_titles">Titles, Meta Descriptions &amp; Headings</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="chk_linking" onchange="toggleMultiField('linking')">
+          <label for="chk_linking">Internal Linking</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="chk_schema" onchange="toggleMultiField('schema')">
+          <label for="chk_schema">Schema Markup</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="chk_content" onchange="toggleMultiField('content')">
+          <label for="chk_content">Content Implementation</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="chk_technical" onchange="toggleMultiField('technical')">
+          <label for="chk_technical">Technical Fix</label>
+        </div>
+      </div>
+
+      <div class="multi-link-fields">
+        <div class="multi-link-field" id="multi_titles">
+          <label>Titles, Meta Descriptions & Headings — Link</label>
+          <input type="url" id="multi_titles_link" placeholder="https://docs.google.com/…">
+          <div style="margin-top:8px">
+            <label>Notes <span class="hint">(optional)</span></label>
+            <textarea id="multi_titles_notes" placeholder="Additional context…" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="multi-link-field" id="multi_linking">
+          <label>Internal Linking — Link</label>
+          <input type="url" id="multi_linking_link" placeholder="https://docs.google.com/…">
+          <div style="margin-top:8px">
+            <label>Notes <span class="hint">(optional)</span></label>
+            <textarea id="multi_linking_notes" placeholder="Additional context…" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="multi-link-field" id="multi_schema">
+          <label>Schema Markup — Link</label>
+          <input type="url" id="multi_schema_link" placeholder="https://docs.google.com/…">
+          <div style="margin-top:8px">
+            <label>Notes <span class="hint">(optional)</span></label>
+            <textarea id="multi_schema_notes" placeholder="Additional context…" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="multi-link-field" id="multi_content">
+          <label>Content Implementation — Link</label>
+          <input type="url" id="multi_content_link" placeholder="https://docs.google.com/…">
+          <div class="multi-sub-options">
+            <div class="toggle-group" id="multiContentToggle">
+              <button class="active" data-value="new" onclick="setMultiContentType(this)">Create New Page</button>
+              <button data-value="update" onclick="setMultiContentType(this)">Update Existing Page</button>
+            </div>
+          </div>
+          <div style="margin-top:8px">
+            <label>Notes <span class="hint">(optional)</span></label>
+            <textarea id="multi_content_notes" placeholder="Additional context…" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="multi-link-field" id="multi_technical">
+          <label>Technical Fix — Notes</label>
+          <textarea id="multi_technical_notes" placeholder="Describe the technical issue…" rows="3"></textarea>
+        </div>
+      </div>
+
+      <button class="btn-generate" onclick="generateMulti()" style="margin-top:20px">Generate All Tickets</button>
+    </div>
+  </div>
+
+  <!-- OUTPUT AREA -->
+  <div class="output-area" id="outputArea"></div>
+
+</div>
+
+<script>
+// SVGs
+const COPY_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="8.5" height="8.5" rx="1.5"/><path d="M3 10.5V3a1.5 1.5 0 011.5-1.5H11"/></svg>';
+const CHECK_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg>';
+
+// State
+let currentMode = 'single';
+let singleContentType = 'new';
+let multiContentType = 'new';
+
+// Persist property name
+const savedName = localStorage.getItem('seo_ticket_property');
+if (savedName) {
+  document.getElementById('propertyName').value = savedName;
+  document.getElementById('multiPropertyName').value = savedName;
+}
+
+function savePropertyName(name) {
+  if (name.trim()) localStorage.setItem('seo_ticket_property', name.trim());
+}
+
+// Mode toggle
+function setMode(mode) {
+  currentMode = mode;
+  const btns = document.querySelectorAll('.mode-toggle button');
+  btns.forEach(b => b.classList.toggle('active', b.textContent.trim().toLowerCase().startsWith(mode)));
+  document.getElementById('singleForm').classList.toggle('hidden', mode === 'multi');
+  document.getElementById('multiForm').classList.toggle('visible', mode === 'multi');
+  document.getElementById('outputArea').innerHTML = '';
+  document.getElementById('outputArea').classList.remove('visible');
+}
+
+// Deliverable change
+function onDeliverableChange() {
+  const val = document.getElementById('deliverableType').value;
+  document.getElementById('contentToggleField').style.display = val === 'content' ? '' : 'none';
+  document.getElementById('linkField').style.display = val === 'technical' ? 'none' : '';
+}
+
+// Content type toggles
+function setContentType(btn) {
+  singleContentType = btn.dataset.value;
+  document.querySelectorAll('#contentToggle button').forEach(b => b.classList.toggle('active', b === btn));
+}
+
+function setMultiContentType(btn) {
+  multiContentType = btn.dataset.value;
+  document.querySelectorAll('#multiContentToggle button').forEach(b => b.classList.toggle('active', b === btn));
+}
+
+// Multi-ticket checkboxes
+function toggleMultiField(type) {
+  const checked = document.getElementById('chk_' + type).checked;
+  document.getElementById('multi_' + type).classList.toggle('visible', checked);
+}
+
+// Template generators
+function generateTicket(type, propertyName, link, notes, contentType) {
+  let subject = '';
+  let body = '';
+  const name = propertyName.trim();
+  const url = (link || '').trim();
+  const n = (notes || '').trim();
+
+  switch (type) {
+    case 'titles':
+      subject = `SEO Update: Title Tags, Meta Descriptions & Headings — ${name}`;
+      body = `Hi there,
+
+We've completed an SEO review of the title tags, meta descriptions, and H1 headings for ${name} and have recommendations ready for implementation.
+
+The linked spreadsheet contains our recommended updates. Each row represents a specific page on the website. The columns show the current values alongside our recommended values for:
+
+  • Title tags
+  • Meta descriptions
+  • H1 headings
+
+Please update each page's title tag, meta description, and H1 heading to match the corresponding "Recommended" columns in the spreadsheet.
+
+Spreadsheet: ${url}`;
+      break;
+
+    case 'linking':
+      subject = `SEO Update: Internal Linking — ${name}`;
+      body = `Hi there,
+
+We've prepared internal linking recommendations for ${name}. Internal links are hyperlinks that connect pages within the same website, helping both users and search engines navigate and understand the site's structure.
+
+The linked spreadsheet contains the specific links that need to be added. Rows are grouped by source page — in some cases, multiple links need to be added to the same page.
+
+For each row:
+  1. Navigate to the page listed in the "Page to Insert Link" column
+  2. Locate the text shown in the "Anchor Text" column on that page
+  3. Hyperlink that text to the URL listed in the "Landing Page" column
+
+Note: If "Existing" appears in the Notes column, the link may already be in place and just needs to be verified.
+
+Spreadsheet: ${url}`;
+      break;
+
+    case 'schema':
+      subject = `SEO Update: Schema Markup — ${name}`;
+      body = `Hi there,
+
+We've prepared schema markup for ${name}. Schema markup is structured data (in JSON-LD format) that helps search engines better understand the content and context of a page, which can enhance how the site appears in search results.
+
+The linked spreadsheet contains the full JSON-LD script block(s) that need to be added to the <head> section of the homepage (or the page specified in the spreadsheet).
+
+Please copy the code exactly as provided — do not modify the script content.
+
+Spreadsheet: ${url}`;
+      break;
+
+    case 'content':
+      if (contentType === 'new') {
+        subject = `SEO Update: New Page Content — ${name}`;
+        body = `Hi there,
+
+We've prepared content for a new page that needs to be created on the ${name} website.
+
+The linked document contains the full page content, including copy, headings, and recommended page structure. Please create the new page and publish it with the provided content.
+
+A few notes:
+  • Any items marked [CLIENT TO PROVIDE] require input from the property team before the page can be published.
+  • Please review any footnotes or comments within the document — they contain additional notes and corrections.
+
+Google Doc: ${url}`;
+      } else {
+        subject = `SEO Update: Page Content Update — ${name}`;
+        body = `Hi there,
+
+We've prepared updated content for an existing page on the ${name} website.
+
+The linked document contains the revised content. Please update the page to match the provided document.
+
+A few notes:
+  • Any items marked [CLIENT TO PROVIDE] require input from the property team before the updates can be published.
+  • Please review any footnotes or comments within the document — they contain additional notes and corrections.
+
+Google Doc: ${url}`;
+      }
+      break;
+
+    case 'technical':
+      subject = `SEO Update: Technical Fix — ${name}`;
+      body = `Hi there,
+
+We've identified a technical issue on the ${name} website that needs to be addressed.
+
+${n}`;
+      return { subject, body };
+  }
+
+  if (n) {
+    body += `\n\nAdditional notes:\n${n}`;
+  }
+
+  return { subject, body };
+}
+
+// Render ticket card
+function renderTicketCard(ticket, index) {
+  const id = 'ticket_' + index + '_' + Date.now();
+  return `
+    <div class="ticket-card">
+      <div class="ticket-header">
+        <span class="ticket-label">${ticket.typeLabel}</span>
+      </div>
+      <div class="ticket-section">
+        <div class="ticket-section-header">
+          <span class="ticket-section-label">Subject</span>
+          <button class="btn-copy" onclick="copyText(this, '${id}_subj')">${COPY_ICON} Copy</button>
+        </div>
+        <div class="ticket-subject" id="${id}_subj">${escapeHtml(ticket.subject)}</div>
+      </div>
+      <div class="ticket-section">
+        <div class="ticket-section-header">
+          <span class="ticket-section-label">Message Body</span>
+          <button class="btn-copy" onclick="copyText(this, '${id}_body')">${COPY_ICON} Copy</button>
+        </div>
+        <div class="ticket-body" id="${id}_body">${escapeHtml(ticket.body)}</div>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+// Copy
+function copyText(btn, elId) {
+  const el = document.getElementById(elId);
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = CHECK_ICON + ' Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = COPY_ICON + ' Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+function copyAllTickets(btn, tickets) {
+  const text = tickets.map(t =>
+    `Subject: ${t.subject}\n\n${t.body}`
+  ).join('\n\n' + '—'.repeat(40) + '\n\n');
+
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = CHECK_ICON + ' Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = COPY_ICON + ' Copy All';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// Type labels
+const TYPE_LABELS = {
+  titles: 'Titles, Meta Descriptions & Headings',
+  linking: 'Internal Linking',
+  schema: 'Schema Markup',
+  content: 'Content Implementation',
+  technical: 'Technical Fix'
+};
+
+// Generate - Single
+function generateSingle() {
+  const name = document.getElementById('propertyName').value.trim();
+  const type = document.getElementById('deliverableType').value;
+  const link = document.getElementById('driveLink').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+
+  if (!name) { alert('Please enter a property name.'); return; }
+  if (!type) { alert('Please select a deliverable type.'); return; }
+  if (type !== 'technical' && !link) { alert('Please enter a Google Drive link.'); return; }
+
+  savePropertyName(name);
+
+  const ticket = generateTicket(type, name, link, notes, singleContentType);
+  ticket.typeLabel = TYPE_LABELS[type];
+
+  const output = document.getElementById('outputArea');
+  output.innerHTML = renderTicketCard(ticket, 0);
+  output.classList.add('visible');
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Generate - Multi
+let lastMultiTickets = [];
+function generateMulti() {
+  const name = document.getElementById('multiPropertyName').value.trim();
+  if (!name) { alert('Please enter a property name.'); return; }
+  savePropertyName(name);
+
+  const types = ['titles', 'linking', 'schema', 'content', 'technical'];
+  const tickets = [];
+
+  for (const type of types) {
+    if (!document.getElementById('chk_' + type).checked) continue;
+
+    let link = '';
+    let notes = '';
+
+    if (type === 'technical') {
+      notes = document.getElementById('multi_technical_notes').value.trim();
+      if (!notes) { alert('Please enter notes for the Technical Fix.'); return; }
+    } else {
+      link = document.getElementById('multi_' + type + '_link').value.trim();
+      if (!link) { alert('Please enter a link for ' + TYPE_LABELS[type] + '.'); return; }
+      const notesEl = document.getElementById('multi_' + type + '_notes');
+      if (notesEl) notes = notesEl.value.trim();
+    }
+
+    const ct = type === 'content' ? multiContentType : 'new';
+    const ticket = generateTicket(type, name, link, notes, ct);
+    ticket.typeLabel = TYPE_LABELS[type];
+    tickets.push(ticket);
+  }
+
+  if (tickets.length === 0) { alert('Please select at least one deliverable.'); return; }
+
+  lastMultiTickets = tickets;
+
+  const output = document.getElementById('outputArea');
+  let html = tickets.map((t, i) => renderTicketCard(t, i)).join('');
+
+  if (tickets.length > 1) {
+    html += `<div class="output-footer"><button class="btn-copy-all" onclick="copyAllTickets(this, lastMultiTickets)">${COPY_ICON} Copy All</button></div>`;
+  }
+
+  output.innerHTML = html;
+  output.classList.add('visible');
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Sync property name between modes
+document.getElementById('propertyName').addEventListener('input', function() {
+  document.getElementById('multiPropertyName').value = this.value;
+});
+document.getElementById('multiPropertyName').addEventListener('input', function() {
+  document.getElementById('propertyName').value = this.value;
+});
+</script>
+
+</body>
+</html>
