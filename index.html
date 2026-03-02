@@ -508,6 +508,11 @@ select {
         </div>
       </div>
 
+      <div class="field" id="pageUrlField" style="display:none;">
+        <label for="pageUrl">Page URL <span class="hint">(URL of the page to update)</span></label>
+        <input type="url" id="pageUrl" placeholder="https://example.com/page-to-update">
+      </div>
+
       <div class="field" id="linkField">
         <label for="driveLink">Google Drive Link <span class="hint">(spreadsheet tab or Google Doc)</span></label>
         <input type="url" id="driveLink" placeholder="https://docs.google.com/…">
@@ -591,6 +596,10 @@ select {
               <button data-value="update" onclick="setMultiContentType(this)">Update Existing Page</button>
             </div>
           </div>
+          <div id="multiPageUrlField" style="display:none;margin-top:8px">
+            <label for="multi_content_page_url">Page URL <span class="hint">(URL of the page to update)</span></label>
+            <input type="url" id="multi_content_page_url" placeholder="https://example.com/page-to-update">
+          </div>
           <div style="margin-top:8px">
             <label>Notes <span class="hint">(optional)</span></label>
             <textarea id="multi_content_notes" placeholder="Additional context…" rows="2"></textarea>
@@ -654,11 +663,13 @@ function onDeliverableChange() {
 function setContentType(btn) {
   singleContentType = btn.dataset.value;
   document.querySelectorAll('#contentToggle button').forEach(b => b.classList.toggle('active', b === btn));
+  document.getElementById('pageUrlField').style.display = singleContentType === 'update' ? '' : 'none';
 }
 
 function setMultiContentType(btn) {
   multiContentType = btn.dataset.value;
   document.querySelectorAll('#multiContentToggle button').forEach(b => b.classList.toggle('active', b === btn));
+  document.getElementById('multiPageUrlField').style.display = multiContentType === 'update' ? '' : 'none';
 }
 
 // Multi-ticket checkboxes
@@ -668,7 +679,7 @@ function toggleMultiField(type) {
 }
 
 // Template generators
-function generateTicket(type, propertyName, link, notes, contentType) {
+function generateTicket(type, propertyName, link, notes, contentType, pageUrl) {
   let subject = '';
   let body = '';
   const name = propertyName.trim();
@@ -750,6 +761,7 @@ A few notes:
   • Any items marked [CLIENT TO PROVIDE] require input from the property team before the updates can be published.
   • Please review any footnotes or comments within the document — they contain additional notes and corrections.
 
+Page URL: ${(pageUrl || '').trim()}
 Google Doc: ${url}`;
       }
       break;
@@ -847,13 +859,16 @@ function generateSingle() {
   const link = document.getElementById('driveLink').value.trim();
   const notes = document.getElementById('notes').value.trim();
 
+  const pageUrl = document.getElementById('pageUrl').value.trim();
+
   if (!name) { alert('Please enter a property name.'); return; }
   if (!type) { alert('Please select a deliverable type.'); return; }
   if (type !== 'technical' && !link) { alert('Please enter a Google Drive link.'); return; }
+  if (type === 'content' && singleContentType === 'update' && !pageUrl) { alert('Please enter the Page URL of the page to update.'); return; }
 
   savePropertyName(name);
 
-  const ticket = generateTicket(type, name, link, notes, singleContentType);
+  const ticket = generateTicket(type, name, link, notes, singleContentType, pageUrl);
   ticket.typeLabel = TYPE_LABELS[type];
 
   const output = document.getElementById('outputArea');
@@ -889,7 +904,12 @@ function generateMulti() {
     }
 
     const ct = type === 'content' ? multiContentType : 'new';
-    const ticket = generateTicket(type, name, link, notes, ct);
+    let pageUrl = '';
+    if (type === 'content' && multiContentType === 'update') {
+      pageUrl = document.getElementById('multi_content_page_url').value.trim();
+      if (!pageUrl) { alert('Please enter the Page URL of the page to update.'); return; }
+    }
+    const ticket = generateTicket(type, name, link, notes, ct, pageUrl);
     ticket.typeLabel = TYPE_LABELS[type];
     tickets.push(ticket);
   }
